@@ -35,6 +35,7 @@ import {
   SuggestBidIncrementOutput,
 } from '@/ai/flows/suggest-bid-increment';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { format } from 'date-fns';
 
 const BidFormSchema = z.object({
   amount: z.number().positive('Bid must be a positive number.'),
@@ -190,7 +191,7 @@ export default function BiddingPanel({ item }: BiddingPanelProps) {
                   <div>
                     <p className="font-semibold">{bid.bidder.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(bid.timestamp).toLocaleString()}
+                      {format(new Date(bid.timestamp), "PPp")}
                     </p>
                   </div>
                 </div>
