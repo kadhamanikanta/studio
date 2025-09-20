@@ -258,7 +258,7 @@ export default function SignupPage() {
                         placeholder="123456"
                         required
                         value={otp}
-                        onChange={(e) => setOtp(e.g.target.value)}
+                        onChange={(e) => setOtp(e.target.value)}
                       />
                     </div>
                     <Button
