@@ -28,7 +28,7 @@ import {
   AvatarImage,
 } from '@/components/ui/avatar';
 import { Gavel, Lightbulb, Loader2 } from 'lucide-react';
-import { type Item } from '@/lib/types';
+import { type Item, type Bid } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import {
   suggestBidIncrement,
@@ -49,25 +49,46 @@ export default function BiddingPanel({ item }: BiddingPanelProps) {
   const { toast } = useToast();
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [suggestion, setSuggestion] = useState<SuggestBidIncrementOutput | null>(null);
+  const [currentItem, setCurrentItem] = useState(item);
 
   const form = useForm<z.infer<typeof BidFormSchema>>({
     resolver: zodResolver(BidFormSchema),
     defaultValues: {
-      amount: item.currentBid ? item.currentBid + 10 : item.price + 10,
+      amount: currentItem.currentBid ? currentItem.currentBid + 10 : currentItem.price + 10,
     },
   });
 
   async function onSubmit(data: z.infer<typeof BidFormSchema>) {
-    if (data.amount <= (item.currentBid || item.price)) {
+    if (data.amount <= (currentItem.currentBid || currentItem.price)) {
       form.setError('amount', {
         type: 'manual',
         message: 'Your bid must be higher than the current bid.',
       });
       return;
     }
+
+    const newBid: Bid = {
+        id: `b-${new Date().getTime()}`,
+        amount: data.amount,
+        timestamp: new Date().toISOString(),
+        bidder: {
+            id: 'u-current',
+            name: 'You',
+            avatarUrl: 'https://picsum.photos/seed/u-current/40/40',
+        },
+    };
+
+    setCurrentItem(prevItem => ({
+        ...prevItem,
+        currentBid: newBid.amount,
+        bids: [newBid, ...(prevItem.bids || [])],
+    }));
+
+    form.setValue('amount', newBid.amount + 10);
+    
     toast({
       title: 'Bid Placed!',
-      description: `You successfully bid $${data.amount.toFixed(2)} on ${item.title}.`,
+      description: `You successfully bid $${data.amount.toFixed(2)} on ${currentItem.title}.`,
     });
   }
 
@@ -76,8 +97,8 @@ export default function BiddingPanel({ item }: BiddingPanelProps) {
     setSuggestion(null);
     try {
       const result = await suggestBidIncrement({
-        currentBid: item.currentBid || item.price,
-        itemValue: item.value || item.price * 1.5, // Fallback if value is not set
+        currentBid: currentItem.currentBid || currentItem.price,
+        itemValue: currentItem.value || currentItem.price * 1.5, // Fallback if value is not set
       });
       setSuggestion(result);
     } catch (error) {
@@ -99,7 +120,7 @@ export default function BiddingPanel({ item }: BiddingPanelProps) {
           <div className="flex items-baseline gap-4">
             <p className="text-sm text-muted-foreground">Current Bid:</p>
             <p className="text-3xl font-bold font-headline text-primary">
-              ${(item.currentBid || item.price).toFixed(2)}
+              ${(currentItem.currentBid || currentItem.price).toFixed(2)}
             </p>
           </div>
         </CardHeader>
@@ -162,7 +183,7 @@ export default function BiddingPanel({ item }: BiddingPanelProps) {
                 <strong>
                   $
                   {(
-                    (item.currentBid || item.price) +
+                    (currentItem.currentBid || currentItem.price) +
                     suggestion.suggestedIncrement
                   ).toFixed(2)}
                 </strong>
@@ -179,7 +200,7 @@ export default function BiddingPanel({ item }: BiddingPanelProps) {
         </CardHeader>
         <CardContent>
           <ul className="space-y-4">
-            {item.bids?.map((bid) => (
+            {currentItem.bids?.map((bid) => (
               <li key={bid.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar>
@@ -200,7 +221,7 @@ export default function BiddingPanel({ item }: BiddingPanelProps) {
                 </p>
               </li>
             ))}
-            {!item.bids?.length && (
+            {!currentItem.bids?.length && (
               <p className="text-muted-foreground text-center py-4">
                 No bids yet. Be the first!
               </p>
