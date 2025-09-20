@@ -1,18 +1,16 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { config } from 'dotenv';
 
-config();
-
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration - this is a public configuration
+// and it's safe to commit this to your repository.
+// Security is enforced by Firebase Security Rules.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  projectId: "studio-2852089076-17daf",
+  appId: "1:611451925537:web:bbf217000f9c49aedf9f60",
+  apiKey: "AIzaSyBqeou5fyh8AogmTYxEWpfGYp5wLdc2LZc",
+  authDomain: "studio-2852089076-17daf.firebaseapp.com",
+  messagingSenderId: "611451925537",
 };
 
 // Initialize Firebase for SSR
