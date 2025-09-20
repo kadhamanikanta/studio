@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
@@ -30,16 +33,92 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+// Extend window type for recaptchaVerifier
+declare global {
+  interface Window {
+    recaptchaVerifier: RecaptchaVerifier;
+    confirmationResult: ConfirmationResult;
+  }
+}
 
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
   const [role, setRole] = useState<UserRole>('buyer');
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] =
+    useState<ConfirmationResult | null>(null);
+  const [otpSent, setOtpSent] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const setupRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        'recaptcha-container',
+        {
+          size: 'invisible',
+          callback: () => {
+            // reCAPTCHA solved, allow signInWithPhoneNumber.
+          },
+        }
+      );
+    }
+  };
+
+  const handlePhoneSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setupRecaptcha();
+    const appVerifier = window.recaptchaVerifier;
+    try {
+      const result = await signInWithPhoneNumber(auth, `+${phone}`, appVerifier);
+      setConfirmationResult(result);
+      setOtpSent(true);
+      toast({
+        title: 'OTP Sent',
+        description: 'Please check your phone for the verification code.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Signup Failed',
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!confirmationResult) return;
+    setIsLoading(true);
+    try {
+      await confirmationResult.confirm(otp);
+      localStorage.setItem('userRole', role);
+      toast({
+        title: 'Account Created',
+        description: "You're now logged in.",
+      });
+      router.push('/');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Signup Failed',
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -47,26 +126,32 @@ export default function SignupPage() {
       toast({
         variant: 'destructive',
         title: 'Signup Failed',
-        description: 'You can only register the admin account with the designated admin email.',
+        description:
+          'You can only register the admin account with the designated admin email.',
       });
       setIsLoading(false);
       return;
     }
-      
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       await sendEmailVerification(userCredential.user);
-      
+
       // Store the selected role so it can be picked up on login
       localStorage.setItem('userRole', role);
 
       toast({
         title: 'Account Created',
-        description: 'A verification email has been sent. Please verify your email before logging in.',
+        description:
+          'A verification email has been sent. Please verify your email before logging in.',
       });
       router.push('/login');
     } catch (error: any) {
-       toast({
+      toast({
         variant: 'destructive',
         title: 'Signup Failed',
         description: error.message,
@@ -78,57 +163,111 @@ export default function SignupPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-15rem)] py-12 px-4">
+      <div id="recaptcha-container"></div>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Icons.logo className="h-10 w-10 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
+          <CardTitle className="text-2xl font-headline">
+            Create an Account
+          </CardTitle>
           <CardDescription>
             Join VendVerse to start buying and selling.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
-             <div className="space-y-2">
-                <Label htmlFor="role">Sign up as</Label>
-                <Select onValueChange={(value) => setRole(value as UserRole)} defaultValue={role}>
-                    <SelectTrigger id="role">
-                        <SelectValue placeholder="Select a role" />
+          <Tabs defaultValue="email">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="email">Email</TabsTrigger>
+              <TabsTrigger value="phone">Phone</TabsTrigger>
+            </TabsList>
+            <TabsContent value="email">
+              <form onSubmit={handleEmailSignup} className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="role-email">Sign up as</Label>
+                  <Select
+                    onValueChange={(value) => setRole(value as UserRole)}
+                    defaultValue={role}
+                  >
+                    <SelectTrigger id="role-email">
+                      <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="buyer">User</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="buyer">User</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
-                </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-              <Input 
-                id="password" 
-                type="password"
-                placeholder="••••••••"
-                required 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Account
-            </Button>
-          </form>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Create Account
+                </Button>
+              </form>
+            </TabsContent>
+            <TabsContent value="phone">
+               {!otpSent ? (
+                <form onSubmit={handlePhoneSignup} className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="1234567890"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                     <p className="text-xs text-muted-foreground">Include country code without '+' or '00'.</p>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Send OTP
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleOtpVerify} className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp">Verification Code</Label>
+                    <Input
+                      id="otp"
+                      type="text"
+                      placeholder="123456"
+                      required
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Verify & Create Account
+                  </Button>
+                </form>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
         <CardFooter className="text-center text-sm">
           <p className="w-full">
