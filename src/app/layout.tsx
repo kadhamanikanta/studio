@@ -4,6 +4,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'VendVerse',
@@ -16,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="light">
+    <html lang="en" className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -38,6 +39,13 @@ export default function RootLayout({
           'min-h-screen bg-background font-body antialiased flex flex-col'
         )}
       >
+        <Image
+          src="https://picsum.photos/seed/cityscape/1920/1080"
+          alt="Cityscape background"
+          fill
+          className="object-cover fixed inset-0 -z-10 opacity-30"
+          data-ai-hint="cityscape background"
+        />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
