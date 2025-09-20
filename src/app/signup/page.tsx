@@ -22,24 +22,43 @@ import { Icons } from '@/components/icons';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { UserRole } from '@/lib/types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<UserRole>('buyer');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    if (role === 'admin' && email !== 'admin@vendverse.com') {
+      toast({
+        variant: 'destructive',
+        title: 'Signup Failed',
+        description: 'You can only register the admin account with the designated admin email.',
+      });
+      setIsLoading(false);
+      return;
+    }
+      
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await sendEmailVerification(userCredential.user);
       
-      // For this demo, we'll store a 'buyer' role.
-      // This is set on the login page now, but we can preset it here.
-      localStorage.setItem('userRole', 'buyer');
+      // Store the selected role so it can be picked up on login
+      localStorage.setItem('userRole', role);
 
       toast({
         title: 'Account Created',
@@ -71,6 +90,18 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup} className="space-y-4">
+             <div className="space-y-2">
+                <Label htmlFor="role">Sign up as</Label>
+                <Select onValueChange={(value) => setRole(value as UserRole)} defaultValue={role}>
+                    <SelectTrigger id="role">
+                        <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="buyer">User</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
