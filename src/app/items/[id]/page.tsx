@@ -22,6 +22,7 @@ import {
 import BiddingPanel from './bidding-panel';
 import { Separator } from '@/components/ui/separator';
 import CountdownTimer from '@/components/ui/countdown-timer';
+import { BackButton } from '@/components/back-button';
 
 type ItemPageProps = {
   params: {
@@ -44,6 +45,7 @@ export default function ItemPage({ params }: ItemPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <BackButton />
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         <div className="relative aspect-square w-full rounded-lg overflow-hidden shadow-lg">
           <Image
