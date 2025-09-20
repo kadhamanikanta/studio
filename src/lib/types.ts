@@ -11,6 +11,8 @@ export type Item = {
   currentBid?: number; // For auctions
   bids?: Bid[]; // For auctions
   value?: number; // Estimated value for auctions
+  status?: 'pending' | 'approved' | 'rejected'; // For admin approval
+  sellerId?: string;
 };
 
 export type Bid = {
@@ -22,4 +24,13 @@ export type Bid = {
     name: string;
     avatarUrl: string;
   };
+};
+
+export type UserRole = 'buyer' | 'seller' | 'admin';
+
+export type User = {
+    id: string;
+    name: string;
+    avatarUrl: string;
+    role: UserRole;
 };

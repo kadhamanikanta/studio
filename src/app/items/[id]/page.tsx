@@ -18,11 +18,13 @@ import {
   Gamepad2,
   Gem,
   PlusCircle,
+  ShieldAlert,
 } from 'lucide-react';
 import BiddingPanel from './bidding-panel';
 import { Separator } from '@/components/ui/separator';
 import CountdownTimer from '@/components/ui/countdown-timer';
 import { BackButton } from '@/components/back-button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type ItemPageProps = {
   params: {
@@ -35,6 +37,23 @@ export default function ItemPage({ params }: ItemPageProps) {
 
   if (!item) {
     notFound();
+  }
+  
+  // For now, we assume only approved items can be viewed directly.
+  // In a real app, you would fetch item status from a database.
+  if (item.status === 'pending' || item.status === 'rejected') {
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <BackButton />
+             <Alert variant="destructive" className="max-w-lg mx-auto mt-8">
+                <ShieldAlert className="h-4 w-4" />
+                <AlertTitle>Item Not Available</AlertTitle>
+                <AlertDescription>
+                    This item is currently under review or has been removed.
+                </AlertDescription>
+            </Alert>
+        </div>
+    )
   }
 
   const categoryIcons: { [key: string]: React.ReactNode } = {

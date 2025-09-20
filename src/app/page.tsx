@@ -12,6 +12,8 @@ import { ItemCard } from '@/components/item-card';
 import { Search } from 'lucide-react';
 
 export default function Home() {
+  const approvedItems = items.filter(item => item.status === 'approved');
+
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="text-center mb-12">
@@ -55,7 +57,7 @@ export default function Home() {
           Featured Items
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {items.map((item) => (
+          {approvedItems.map((item) => (
             <ItemCard key={item.id} item={item} />
           ))}
         </div>
