@@ -5,6 +5,7 @@ import { Footer } from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
   title: 'VendVerse',
@@ -39,17 +40,19 @@ export default function RootLayout({
           'min-h-screen bg-background font-body antialiased flex flex-col'
         )}
       >
-        <Image
-          src="https://picsum.photos/seed/gold-abstract/1920/1080"
-          alt="Abstract gold and black background"
-          fill
-          className="object-cover fixed inset-0 -z-10 opacity-20"
-          data-ai-hint="abstract gold"
-        />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Toaster />
+        <AuthProvider>
+          <Image
+            src="https://picsum.photos/seed/gold-abstract/1920/1080"
+            alt="Abstract gold and black background"
+            fill
+            className="object-cover fixed inset-0 -z-10 opacity-20"
+            data-ai-hint="abstract gold"
+          />
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

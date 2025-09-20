@@ -51,11 +51,12 @@ export default function LoginPage() {
             title: 'Login Successful',
             description: "Welcome back!",
         });
-        // In a real app, you'd fetch the user's role from your database.
-        // For now, we'll simulate the redirect based on selection.
+        
+        // Save role to localStorage to be picked up by AuthProvider
+        localStorage.setItem('userRole', role);
+        
         if (role === 'admin') {
-            // redirect to admin dashboard, which we'll create later
-            router.push('/'); 
+            router.push('/admin'); 
         } else {
             router.push('/');
         }
