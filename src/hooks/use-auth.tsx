@@ -30,14 +30,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        // Check email for hardcoded admin
-        if (firebaseUser.email === 'admin@vendverse.com') {
+        // Retrieve role from localStorage.
+        const storedRole = localStorage.getItem('userRole') as UserRole;
+        if (firebaseUser.email === 'admin@vendverse.com' && storedRole === 'admin') {
            setUserRole('admin');
-           localStorage.setItem('userRole', 'admin');
         } else {
-           // For other users, retrieve role from localStorage or default to 'buyer'.
-           const storedRole = localStorage.getItem('userRole') as UserRole;
-           setUserRole(storedRole || 'buyer');
+           // Default to buyer if the role is not admin or not set.
+           setUserRole('buyer');
         }
       } else {
         setUserRole(null);
@@ -51,6 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await signOut(auth);
+    localStorage.removeItem('userRole');
+    // We don't need to setUser or setUserRole to null here,
+    // the onAuthStateChanged listener will handle it.
   };
   
   const value = { user, userRole, loading, logout };

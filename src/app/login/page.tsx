@@ -23,20 +23,36 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { UserRole } from '@/lib/types';
-import { useAuth } from '@/hooks/use-auth';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<UserRole>('buyer');
   const [isLoading, setIsLoading] = useState(false);
-  const { user, userRole, loading } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      if (role === 'admin' && email !== 'admin@vendverse.com') {
+        toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'This email is not authorized for admin access.',
+        });
+        setIsLoading(false);
+        return;
+      }
+        
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       
       if (!userCredential.user.emailVerified) {
@@ -47,15 +63,15 @@ export default function LoginPage() {
         });
         await auth.signOut(); // Sign out the user
       } else {
+        // Store the selected role
+        localStorage.setItem('userRole', role);
+
         toast({
             title: 'Login Successful',
             description: "Welcome back!",
         });
 
-        // The AuthProvider will handle role detection and redirection
-        // We just need to push to a default page and let it sort it out.
-        // This avoids race conditions.
-        if (email === 'admin@vendverse.com') {
+        if (role === 'admin') {
              router.push('/admin');
         } else {
              router.push('/');
@@ -111,6 +127,18 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
+             <div className="space-y-2">
+                <Label htmlFor="role">Login as</Label>
+                <Select onValueChange={(value) => setRole(value as UserRole)} defaultValue={role}>
+                    <SelectTrigger id="role">
+                        <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="buyer">User</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

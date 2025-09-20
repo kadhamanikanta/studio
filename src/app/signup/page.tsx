@@ -38,7 +38,7 @@ export default function SignupPage() {
       await sendEmailVerification(userCredential.user);
       
       // For this demo, we'll store a 'buyer' role.
-      // The admin role is handled automatically by the AuthProvider for the specific admin email.
+      // This is set on the login page now, but we can preset it here.
       localStorage.setItem('userRole', 'buyer');
 
       toast({
