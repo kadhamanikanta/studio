@@ -40,11 +40,11 @@ export default function RootLayout({
         )}
       >
         <Image
-          src="https://picsum.photos/seed/cityscape/1920/1080"
-          alt="Cityscape background"
+          src="https://picsum.photos/seed/gold-abstract/1920/1080"
+          alt="Abstract gold and black background"
           fill
-          className="object-cover fixed inset-0 -z-10 opacity-30"
-          data-ai-hint="cityscape background"
+          className="object-cover fixed inset-0 -z-10 opacity-20"
+          data-ai-hint="abstract gold"
         />
         <Header />
         <main className="flex-1">{children}</main>
