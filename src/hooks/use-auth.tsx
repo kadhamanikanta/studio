@@ -30,20 +30,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        // In a real app, you would fetch the user's role from your database.
-        // For this demo, we'll retrieve it from localStorage or default to 'buyer'.
-        const storedRole = localStorage.getItem('userRole') as UserRole;
-        if (storedRole) {
-          setUserRole(storedRole);
+        // Check email for hardcoded admin
+        if (firebaseUser.email === 'admin@vendverse.com') {
+           setUserRole('admin');
+           localStorage.setItem('userRole', 'admin');
         } else {
-          // Check email for admin
-          if (firebaseUser.email === 'admin@vendverse.com') {
-             setUserRole('admin');
-             localStorage.setItem('userRole', 'admin');
-          } else {
-             setUserRole('buyer');
-             localStorage.setItem('userRole', 'buyer');
-          }
+           // For other users, retrieve role from localStorage or default to 'buyer'.
+           const storedRole = localStorage.getItem('userRole') as UserRole;
+           setUserRole(storedRole || 'buyer');
         }
       } else {
         setUserRole(null);

@@ -22,30 +22,24 @@ import { Icons } from '@/components/icons';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { UserRole } from '@/lib/types';
 
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('buyer');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // In a real app, you'd save the role to your database (e.g., Firestore)
-      // associated with the user's UID.
-      console.log('Signing up user with role:', role);
-      
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await sendEmailVerification(userCredential.user);
-
-      // Here you would typically write to your database:
-      // await setUserRole(userCredential.user.uid, role);
+      
+      // For this demo, we'll store a 'buyer' role.
+      // The admin role is handled automatically by the AuthProvider for the specific admin email.
+      localStorage.setItem('userRole', 'buyer');
 
       toast({
         title: 'Account Created',
@@ -53,7 +47,7 @@ export default function SignupPage() {
       });
       router.push('/login');
     } catch (error: any) {
-      toast({
+       toast({
         variant: 'destructive',
         title: 'Signup Failed',
         description: error.message,
@@ -82,7 +76,7 @@ export default function SignupPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="vendor@example.com"
+                placeholder="you@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -92,28 +86,16 @@ export default function SignupPage() {
                 <Label htmlFor="password">Password</Label>
               <Input 
                 id="password" 
-                type="password" 
+                type="password"
+                placeholder="••••••••"
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <div className="space-y-3">
-              <Label>I am a...</Label>
-              <RadioGroup onValueChange={(value: UserRole) => setRole(value)} defaultValue={role} className="flex gap-4">
-                  <div className="flex items-center space-x-3 space-y-0">
-                      <RadioGroupItem value="buyer" id="buyer" />
-                      <Label htmlFor="buyer" className="font-normal">Buyer</Label>
-                  </div>
-                    <div className="flex items-center space-x-3 space-y-0">
-                      <RadioGroupItem value="seller" id="seller" />
-                      <Label htmlFor="seller" className="font-normal">Seller</Label>
-                  </div>
-              </RadioGroup>
-            </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign Up
+              Create Account
             </Button>
           </form>
         </CardContent>
