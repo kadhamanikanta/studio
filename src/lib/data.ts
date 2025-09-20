@@ -9,7 +9,7 @@ export const items: Item[] = [
     description:
       "First edition copy of the sci-fi classic 'Dune'. A masterpiece of speculative fiction, this novel is a must-have for any serious collector. The book is in excellent condition with its original dust jacket.",
     category: 'Books',
-    imageUrl: 'https://picsum.photos/seed/201/600/800',
+    imageUrl: 'https://picsum.photos/seed/dune-book/600/800',
     imageHint: 'book cover',
     type: 'auction',
     price: 50.0,
@@ -49,7 +49,7 @@ export const items: Item[] = [
     description:
       'Brand new, unopened PlayStation 5 Disc Edition. Experience lightning-fast loading with an ultra-high-speed SSD, deeper immersion with support for haptic feedback, adaptive triggers, and 3D Audio.',
     category: 'Gaming',
-    imageUrl: 'https://picsum.photos/seed/202/800/600',
+    imageUrl: 'https://picsum.photos/seed/playstation-5/800/600',
     imageHint: 'gaming console',
     type: 'fixed',
     price: 499.99,
@@ -60,7 +60,7 @@ export const items: Item[] = [
     description:
       'A vintage paperback edition of the timeless classic, Foundation. The first book in the epic Foundation series, this is a cornerstone of science fiction literature.',
     category: 'Books',
-    imageUrl: 'https://picsum.photos/seed/203/600/800',
+    imageUrl: 'https://picsum.photos/seed/asimov-book/600/800',
     imageHint: 'science fiction',
     type: 'fixed',
     price: 19.99,
@@ -71,7 +71,7 @@ export const items: Item[] = [
     description:
       'Lightly used Nintendo Switch OLED model with a vibrant 7-inch screen. Includes all original accessories and packaging. Perfect for gaming on the go or at home.',
     category: 'Gaming',
-    imageUrl: 'https://picsum.photos/seed/204/800/600',
+    imageUrl: 'https://picsum.photos/seed/nintendo-switch/800/600',
     imageHint: 'nintendo switch',
     type: 'auction',
     price: 200.0,
@@ -99,7 +99,7 @@ export const items: Item[] = [
     description:
       'A classic Polaroid 600 series instant camera from the 1980s. Tested and working perfectly. A beautiful piece for photography enthusiasts and collectors.',
     category: 'Collectibles',
-    imageUrl: 'https://picsum.photos/seed/205/800/600',
+    imageUrl: 'https://picsum.photos/seed/polaroid-camera/800/600',
     imageHint: 'vintage camera',
     type: 'fixed',
     price: 85.0,
@@ -110,7 +110,7 @@ export const items: Item[] = [
     description:
       'A hardcover edition of the quintessential American cookbook. Packed with timeless recipes, this book is an essential for any kitchen.',
     category: 'Books',
-    imageUrl: 'https://picsum.photos/seed/206/600/800',
+    imageUrl: 'https://picsum.photos/seed/cookbook/600/800',
     imageHint: 'cookbook food',
     type: 'fixed',
     price: 25.0,
@@ -121,7 +121,7 @@ export const items: Item[] = [
     description:
       "Original Nintendo 64 game cartridge: Super Mario 64. The label is in great condition and the game plays flawlessly. A true piece of gaming history.",
     category: 'Gaming',
-    imageUrl: 'https://picsum.photos/seed/207/600/600',
+    imageUrl: 'https://picsum.photos/seed/mario-cartridge/600/600',
     imageHint: 'retro game',
     type: 'auction',
     price: 20,
@@ -149,7 +149,7 @@ export const items: Item[] = [
     description:
       'Original 1973 pressing of Pink Floyd\'s iconic album "The Dark Side of the Moon". The vinyl and sleeve are in very good condition for their age.',
     category: 'Collectibles',
-    imageUrl: 'https://picsum.photos/seed/208/800/800',
+    imageUrl: 'https://picsum.photos/seed/pink-floyd-vinyl/800/800',
     imageHint: 'vinyl record',
     type: 'fixed',
     price: 120.0,
