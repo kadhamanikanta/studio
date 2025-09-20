@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
   signInWithPopup,
   GoogleAuthProvider,
-  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
@@ -33,20 +33,21 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(userCredential.user);
       toast({
-        title: 'Login Successful',
-        description: "Welcome back!",
+        title: 'Account Created',
+        description: 'A verification email has been sent to your inbox. Please verify your email before logging in.',
       });
-      router.push('/');
+      router.push('/login');
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Login Failed',
+        title: 'Signup Failed',
         description: error.message,
       });
     } finally {
@@ -59,7 +60,7 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      toast({
+       toast({
         title: 'Login Successful',
         description: "Welcome!",
       });
@@ -74,30 +75,6 @@ export default function LoginPage() {
       setIsGoogleLoading(false);
     }
   };
-  
-  const handleForgotPassword = async () => {
-    if (!email) {
-      toast({
-        variant: 'destructive',
-        title: 'Email required',
-        description: 'Please enter your email to reset your password.',
-      });
-      return;
-    }
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast({
-        title: 'Password Reset Email Sent',
-        description: 'Check your inbox for a link to reset your password.',
-      });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message,
-      });
-    }
-  };
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-15rem)] py-12 px-4">
@@ -106,13 +83,13 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Icons.logo className="h-10 w-10 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-headline">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
           <CardDescription>
-            Log in to your VendVerse vendor account.
+            Join VendVerse to start buying and selling.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -125,16 +102,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center">
                 <Label htmlFor="password">Password</Label>
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="ml-auto inline-block text-sm underline"
-                >
-                  Forgot your password?
-                </button>
-              </div>
               <Input 
                 id="password" 
                 type="password" 
@@ -145,19 +113,19 @@ export default function LoginPage() {
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Login
+              Sign Up
             </Button>
             <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isGoogleLoading}>
-               {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icons.google className="mr-2 h-4 w-4" /> }
-              Login with Google
+              {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icons.google className="mr-2 h-4 w-4" /> }
+              Sign Up with Google
             </Button>
           </form>
         </CardContent>
         <CardFooter className="text-center text-sm">
           <p className="w-full">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="underline">
-              Sign up
+            Already have an account?{' '}
+            <Link href="/login" className="underline">
+              Log in
             </Link>
           </p>
         </CardFooter>
