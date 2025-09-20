@@ -22,12 +22,15 @@ import { Icons } from '@/components/icons';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UserRole } from '@/lib/types';
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<UserRole>('buyer');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -48,7 +51,14 @@ export default function LoginPage() {
             title: 'Login Successful',
             description: "Welcome back!",
         });
-        router.push('/');
+        // In a real app, you'd fetch the user's role from your database.
+        // For now, we'll simulate the redirect based on selection.
+        if (role === 'admin') {
+            // redirect to admin dashboard, which we'll create later
+            router.push('/'); 
+        } else {
+            router.push('/');
+        }
       }
 
     } catch (error: any) {
@@ -95,7 +105,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl font-headline">Welcome Back</CardTitle>
           <CardDescription>
-            Log in to your VendVerse vendor account.
+            Log in to your VendVerse account.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -129,6 +139,18 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="role">Login as</Label>
+              <Select onValueChange={(value: UserRole) => setRole(value)} defaultValue={role}>
+                  <SelectTrigger id="role">
+                      <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="buyer">User</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+              </Select>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
