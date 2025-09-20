@@ -92,13 +92,30 @@ export default function LoginPage() {
     if (!confirmationResult) return;
     setIsLoading(true);
     try {
-      await confirmationResult.confirm(otp);
+      const result = await confirmationResult.confirm(otp);
+      
+      if (role === 'admin' && result.user.phoneNumber !== process.env.NEXT_PUBLIC_ADMIN_PHONE) {
+         toast({
+          variant: 'destructive',
+          title: 'Login Failed',
+          description: 'This phone number is not authorized for admin access.',
+        });
+        await auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
       localStorage.setItem('userRole', role);
       toast({
         title: 'Login Successful',
         description: 'Welcome back!',
       });
-      router.push('/');
+      
+      if (role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -200,105 +217,123 @@ export default function LoginPage() {
           <CardDescription>Log in to your VendVerse account.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="email">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="email">Email</TabsTrigger>
-              <TabsTrigger value="phone">Phone</TabsTrigger>
-            </TabsList>
-            <TabsContent value="email">
-              <form onSubmit={handleEmailLogin} className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="role-email">Login as</Label>
-                  <Select
-                    onValueChange={(value) => setRole(value as UserRole)}
-                    defaultValue={role}
-                  >
-                    <SelectTrigger id="role-email">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="buyer">User</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="vendor@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
-                    <button
-                      type="button"
-                      onClick={handleForgotPassword}
-                      className="ml-auto inline-block text-sm underline"
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="role-login">Login as</Label>
+              <Select
+                onValueChange={(value) => setRole(value as UserRole)}
+                defaultValue={role}
+              >
+                <SelectTrigger id="role-login">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="buyer">User</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Tabs defaultValue="email">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="email">Email</TabsTrigger>
+                <TabsTrigger value="phone">Phone</TabsTrigger>
+              </TabsList>
+              <TabsContent value="email">
+                <form onSubmit={handleEmailLogin} className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="vendor@example.com"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <Label htmlFor="password">Password</Label>
+                      <button
+                        type="button"
+                        onClick={handleForgotPassword}
+                        className="ml-auto inline-block text-sm underline"
+                      >
+                        Forgot your password?
+                      </button>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Login
+                  </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="phone">
+                {!otpSent ? (
+                  <form onSubmit={handlePhoneLogin} className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="1234567890"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Include country code without '+' or '00'.
+                      </p>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isLoading}
                     >
-                      Forgot your password?
-                    </button>
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Login
-                </Button>
-              </form>
-            </TabsContent>
-            <TabsContent value="phone">
-              {!otpSent ? (
-                <form onSubmit={handlePhoneLogin} className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="1234567890"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                    />
-                     <p className="text-xs text-muted-foreground">Include country code without '+' or '00'.</p>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Send OTP
-                  </Button>
-                </form>
-              ) : (
-                <form onSubmit={handleOtpVerify} className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="otp">Verification Code</Label>
-                    <Input
-                      id="otp"
-                      type="text"
-                      placeholder="123456"
-                      required
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Verify & Login
-                  </Button>
-                </form>
-              )}
-            </TabsContent>
-          </Tabs>
+                      {isLoading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Send OTP
+                    </Button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleOtpVerify} className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="otp">Verification Code</Label>
+                      <Input
+                        id="otp"
+                        type="text"
+                        placeholder="123456"
+                        required
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isLoading}
+                    >
+                      {isLoading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Verify & Login
+                    </Button>
+                  </form>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
         </CardContent>
         <CardFooter className="text-center text-sm">
           <p className="w-full">

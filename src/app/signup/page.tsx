@@ -100,7 +100,19 @@ export default function SignupPage() {
     if (!confirmationResult) return;
     setIsLoading(true);
     try {
-      await confirmationResult.confirm(otp);
+       const result = await confirmationResult.confirm(otp);
+
+      if (role === 'admin' && result.user.phoneNumber !== process.env.NEXT_PUBLIC_ADMIN_PHONE) {
+        toast({
+          variant: 'destructive',
+          title: 'Signup Failed',
+          description: 'This phone number cannot be registered as an admin.',
+        });
+        await auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+      
       localStorage.setItem('userRole', role);
       toast({
         title: 'Account Created',
@@ -177,97 +189,115 @@ export default function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="email">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="email">Email</TabsTrigger>
-              <TabsTrigger value="phone">Phone</TabsTrigger>
-            </TabsList>
-            <TabsContent value="email">
-              <form onSubmit={handleEmailSignup} className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="role-email">Sign up as</Label>
-                  <Select
-                    onValueChange={(value) => setRole(value as UserRole)}
-                    defaultValue={role}
-                  >
-                    <SelectTrigger id="role-email">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="buyer">User</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Account
-                </Button>
-              </form>
-            </TabsContent>
-            <TabsContent value="phone">
-               {!otpSent ? (
-                <form onSubmit={handlePhoneSignup} className="space-y-4 pt-4">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="role-signup">Sign up as</Label>
+              <Select
+                onValueChange={(value) => setRole(value as UserRole)}
+                defaultValue={role}
+              >
+                <SelectTrigger id="role-signup">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="buyer">User</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Tabs defaultValue="email">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="email">Email</TabsTrigger>
+                <TabsTrigger value="phone">Phone</TabsTrigger>
+              </TabsList>
+              <TabsContent value="email">
+                <form onSubmit={handleEmailSignup} className="space-y-4 pt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="1234567890"
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
                       required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
-                     <p className="text-xs text-muted-foreground">Include country code without '+' or '00'.</p>
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Send OTP
-                  </Button>
-                </form>
-              ) : (
-                <form onSubmit={handleOtpVerify} className="space-y-4 pt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="otp">Verification Code</Label>
+                    <Label htmlFor="password">Password</Label>
                     <Input
-                      id="otp"
-                      type="text"
-                      placeholder="123456"
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
                       required
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Verify & Create Account
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Create Account
                   </Button>
                 </form>
-              )}
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+              <TabsContent value="phone">
+                {!otpSent ? (
+                  <form onSubmit={handlePhoneSignup} className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="1234567890"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Include country code without '+' or '00'.
+                      </p>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isLoading}
+                    >
+                      {isLoading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Send OTP
+                    </Button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleOtpVerify} className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="otp">Verification Code</Label>
+                      <Input
+                        id="otp"
+                        type="text"
+                        placeholder="123456"
+                        required
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isLoading}
+                    >
+                      {isLoading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Verify & Create Account
+                    </Button>
+                  </form>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
         </CardContent>
         <CardFooter className="text-center text-sm">
           <p className="w-full">
