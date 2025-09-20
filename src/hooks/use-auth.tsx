@@ -45,14 +45,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    // Listen for changes in localStorage to sync across tabs
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'userRole') {
+        setUserRole(event.newValue as UserRole | null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+        unsubscribe();
+        window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const logout = async () => {
     await signOut(auth);
-    localStorage.removeItem('userRole');
-    // We don't need to setUser or setUserRole to null here,
-    // the onAuthStateChanged listener will handle it.
+    // The onAuthStateChanged listener will handle clearing user and role state.
   };
   
   const value = { user, userRole, loading, logout };
