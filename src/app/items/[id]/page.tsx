@@ -32,7 +32,7 @@ type ItemPageProps = {
   };
 };
 
-export default function ItemPage({ params }: ItemPageProps) {
+export default async function ItemPage({ params }: ItemPageProps) {
   const item = items.find((i) => i.id === params.id);
 
   if (!item) {
