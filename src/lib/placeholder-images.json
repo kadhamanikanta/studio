@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "book-dune",
+      "description": "The cover of the sci-fi novel Dune.",
+      "imageUrl": "https://picsum.photos/seed/101/600/800",
+      "imageHint": "book cover"
+    },
+    {
+      "id": "console-ps5",
+      "description": "A white and black futuristic gaming console.",
+      "imageUrl": "https://picsum.photos/seed/102/800/600",
+      "imageHint": "gaming console"
+    },
+    {
+      "id": "book-foundation",
+      "description": "The cover of the sci-fi novel Foundation.",
+      "imageUrl": "https://picsum.photos/seed/103/600/800",
+      "imageHint": "science fiction"
+    },
+    {
+      "id": "console-switch",
+      "description": "A handheld gaming console with detachable controllers.",
+      "imageUrl": "https://picsum.photos/seed/104/800/600",
+      "imageHint": "nintendo switch"
+    },
+    {
+      "id": "vintage-camera",
+      "description": "An old-fashioned film camera with a leather strap.",
+      "imageUrl": "https://picsum.photos/seed/105/800/600",
+      "imageHint": "vintage camera"
+    },
+    {
+      "id": "book-cookbook",
+      "description": "A vibrant cookbook with a dish on the cover.",
+      "imageUrl": "https://picsum.photos/seed/106/600/800",
+      "imageHint": "cookbook food"
+    },
+    {
+      "id": "retro-game-cartridge",
+      "description": "A classic video game cartridge.",
+      "imageUrl": "https://picsum.photos/seed/107/600/600",
+      "imageHint": "retro game"
+    },
+    {
+      "id": "vinyl-record",
+      "description": "A black vinyl record in its sleeve.",
+      "imageUrl": "https://picsum.photos/seed/108/800/800",
+      "imageHint": "vinyl record"
+    }
+  ]
 }
