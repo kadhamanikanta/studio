@@ -100,19 +100,8 @@ export default function SignupPage() {
     if (!confirmationResult) return;
     setIsLoading(true);
     try {
-       const result = await confirmationResult.confirm(otp);
+      await confirmationResult.confirm(otp);
 
-      if (role === 'admin' && result.user.phoneNumber !== process.env.NEXT_PUBLIC_ADMIN_PHONE) {
-        toast({
-          variant: 'destructive',
-          title: 'Signup Failed',
-          description: 'This phone number cannot be registered as an admin.',
-        });
-        await auth.signOut();
-        setIsLoading(false);
-        return;
-      }
-      
       localStorage.setItem('userRole', role);
       toast({
         title: 'Account Created',
@@ -133,17 +122,6 @@ export default function SignupPage() {
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    if (role === 'admin' && email !== 'admin@vendverse.com') {
-      toast({
-        variant: 'destructive',
-        title: 'Signup Failed',
-        description:
-          'You can only register the admin account with the designated admin email.',
-      });
-      setIsLoading(false);
-      return;
-    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -280,7 +258,7 @@ export default function SignupPage() {
                         placeholder="123456"
                         required
                         value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
+                        onChange={(e) => setOtp(e.g.target.value)}
                       />
                     </div>
                     <Button

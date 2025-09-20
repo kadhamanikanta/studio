@@ -92,19 +92,8 @@ export default function LoginPage() {
     if (!confirmationResult) return;
     setIsLoading(true);
     try {
-      const result = await confirmationResult.confirm(otp);
+      await confirmationResult.confirm(otp);
       
-      if (role === 'admin' && result.user.phoneNumber !== process.env.NEXT_PUBLIC_ADMIN_PHONE) {
-         toast({
-          variant: 'destructive',
-          title: 'Login Failed',
-          description: 'This phone number is not authorized for admin access.',
-        });
-        await auth.signOut();
-        setIsLoading(false);
-        return;
-      }
-
       localStorage.setItem('userRole', role);
       toast({
         title: 'Login Successful',
@@ -131,16 +120,6 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      if (role === 'admin' && email !== 'admin@vendverse.com') {
-        toast({
-          variant: 'destructive',
-          title: 'Login Failed',
-          description: 'This email is not authorized for admin access.',
-        });
-        setIsLoading(false);
-        return;
-      }
-
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,

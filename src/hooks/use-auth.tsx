@@ -32,10 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (firebaseUser) {
         // Retrieve role from localStorage.
         const storedRole = localStorage.getItem('userRole') as UserRole;
-        if (firebaseUser.email === 'admin@vendverse.com' && storedRole === 'admin') {
-           setUserRole('admin');
+        if (storedRole) {
+           setUserRole(storedRole);
         } else {
-           // Default to buyer if the role is not admin or not set.
+           // Default to buyer if role is not set.
            setUserRole('buyer');
         }
       } else {
